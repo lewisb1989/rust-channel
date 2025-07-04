@@ -77,7 +77,7 @@ impl<T: Debug + Clone> InnerProducer<T> {
     fn update_offset(&mut self, consumer: usize) {
         let consumers = self.get_consumers_mut();
         let offset = consumers.get_mut(consumer).unwrap();
-        *offset = *offset + 1;
+        *offset += 1;
     }
     
     fn recv(&mut self, consumer: usize) -> Result<Option<T>, String> {
@@ -86,9 +86,9 @@ impl<T: Debug + Clone> InnerProducer<T> {
             let consumers = self.get_consumers();
             let offset = consumers.get(consumer).unwrap();
             if *offset < queue.len() {
-            let message = queue.get(*offset).unwrap();
-            self.update_offset(consumer);
-            Ok(Some(message.clone()))
+                let message = queue.get(*offset).unwrap();
+                self.update_offset(consumer);
+                Ok(Some(message.clone()))
             } else {
                 Ok(None)
             }
