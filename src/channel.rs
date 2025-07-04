@@ -107,9 +107,12 @@ pub struct Consumer<T: Debug + Clone> {
 impl<T: Debug + Clone> Consumer<T> {
 
     fn new(producer: AtomicPtr<InnerProducer<T>>) -> Self {
-        Self {
-            producer,
-            id: 0
+        unsafe {
+            let id = (*producer.as_ptr()).as_mut().unwrap().register();
+            Self {
+                producer,
+                id: id
+            }
         }
     }
 

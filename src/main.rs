@@ -1,4 +1,5 @@
 mod channel;
+mod channel_test;
 
 use std::thread;
 use std::sync::{RwLock, Arc};
