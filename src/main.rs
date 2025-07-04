@@ -47,4 +47,7 @@ fn main() {
     // print message counts
     println!("tx1 message count = {:#?}", tx1_count.read().unwrap());
     println!("tx2 message count = {:#?}", tx2_count.read().unwrap());
+    // recv also works
+    producer.send(0);
+    assert_eq!(consumer.recv(), 0);
 }

@@ -27,7 +27,7 @@ impl<T: Debug + Clone> Producer<T> {
 
 pub struct InnerProducer<T: Debug> {
     consumers: AtomicPtr<Vec<usize>>,
-    queue_ptr: AtomicPtr<Vec<T>>
+    queue: AtomicPtr<Vec<T>>
 }
 
 impl<T: Debug + Clone> InnerProducer<T> {
@@ -37,19 +37,19 @@ impl<T: Debug + Clone> InnerProducer<T> {
         let consumers = Box::into_raw(Box::new(Vec::new()));
         Self {
             consumers: AtomicPtr::new(consumers),
-            queue_ptr: AtomicPtr::new(queue)
+            queue: AtomicPtr::new(queue)
         }
     }
     
     fn get_queue_mut(&mut self) -> &mut Vec<T> {
         unsafe {
-            (*self.queue_ptr.get_mut()).as_mut().unwrap()
+            (*self.queue.get_mut()).as_mut().unwrap()
         }
     }
     
     fn get_queue(&self) -> Vec<T> {
         unsafe {
-            (*self.queue_ptr.as_ptr()).as_ref().unwrap().clone()
+            (*self.queue.as_ptr()).as_ref().unwrap().clone()
         }
     }
 
@@ -111,7 +111,7 @@ impl<T: Debug + Clone> Consumer<T> {
             let id = (*producer.as_ptr()).as_mut().unwrap().register();
             Self {
                 producer,
-                id: id
+                id
             }
         }
     }
