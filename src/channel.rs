@@ -112,35 +112,42 @@ impl<T: Debug + Clone> Consumer<T> {
             id: 0
         }
     }
+
+    pub fn try_recv(&self) -> Option<T> {
+        unsafe {
+            match (*self.producer.as_ptr()).as_mut().unwrap().recv(self.id) {
+                Ok(result) => result,
+                Err(err) => {
+                    panic!("{}", err);
+                }
+            }
+        }
+    }
     
     pub fn recv(&self) -> T {
         let mut message = None;
         while message.is_none() {
-            match self.get_producer_mut().recv(self.id) {
-                Ok(result) => {
-                    if let Some(value) = result {
-                        message = Some(value);
+            unsafe {
+                match (*self.producer.as_ptr()).as_mut().unwrap().recv(self.id) {
+                    Ok(result) => {
+                        if let Some(value) = result {
+                            message = Some(value);
+                        }
                     }
-                }
-                Err(err) => {
-                    panic!("{}", err);
+                    Err(err) => {
+                        panic!("{}", err);
+                    }
                 }
             }
         }
         message.unwrap()
     }
 
-    fn get_producer_mut(&self) -> &mut InnerProducer<T> {
-        unsafe {
-            (*self.producer.as_ptr()).as_mut().unwrap()
-        }
-    }
-
     pub fn clone(&self) -> Self {
         unsafe {
             Self {
                 producer: AtomicPtr::new(*self.producer.as_ptr()),
-                id: self.get_producer_mut().register()
+                id: (*self.producer.as_ptr()).as_mut().unwrap().register()
             }
         }
     }
